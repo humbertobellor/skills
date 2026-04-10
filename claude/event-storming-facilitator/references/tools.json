@@ -1,0 +1,180 @@
+{
+  "description": "Tool definitions for the Event Storming Facilitator when integrated into a multi-agent system via the Claude API. Each tool mutates a shared board state object accessible to all agents.",
+  "tools": [
+    {
+      "name": "add_domain_event",
+      "description": "Place a domain event on the Event Storming board.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Past-tense phrase, e.g. 'Campaign Published'"
+          },
+          "description": { "type": "string" },
+          "originating_agent": { "type": "string" },
+          "phase_added": { "type": "string" }
+        },
+        "required": ["name", "originating_agent"]
+      }
+    },
+    {
+      "name": "add_command",
+      "description": "Place a command that causes a domain event.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Imperative phrase, e.g. 'Publish Campaign'"
+          },
+          "triggers_event": { "type": "string" },
+          "actor": { "type": "string" },
+          "data_needed": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["name", "triggers_event", "actor"]
+      }
+    },
+    {
+      "name": "define_aggregate",
+      "description": "Define an aggregate that groups related events and commands.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "related_events": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "related_commands": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "invariants": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "bounded_context": { "type": "string" }
+        },
+        "required": ["name", "related_events", "related_commands"]
+      }
+    },
+    {
+      "name": "add_policy",
+      "description": "Define a reactive business rule: whenever event X, then command Y.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "triggered_by_event": { "type": "string" },
+          "triggers_command": { "type": "string" },
+          "rule_description": { "type": "string" },
+          "crosses_context_boundary": { "type": "boolean" }
+        },
+        "required": ["triggered_by_event", "triggers_command", "rule_description"]
+      }
+    },
+    {
+      "name": "mark_hotspot",
+      "description": "Flag an unresolved question, conflict, or risk on the board.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "related_events": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "type": {
+            "type": "string",
+            "enum": ["question", "conflict", "risk", "complexity"]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["High", "Medium", "Low"]
+          },
+          "flagged_by": { "type": "string" }
+        },
+        "required": ["description", "type", "severity"]
+      }
+    },
+    {
+      "name": "define_bounded_context",
+      "description": "Declare a named bounded context and its relationships.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "aggregates": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "upstream_contexts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "downstream_contexts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "relationship_type": {
+            "type": "string",
+            "enum": [
+              "Shared Kernel",
+              "Customer-Supplier",
+              "Anti-Corruption Layer",
+              "Published Language",
+              "Conformist"
+            ]
+          }
+        },
+        "required": ["name", "aggregates"]
+      }
+    },
+    {
+      "name": "get_board_state",
+      "description": "Retrieve the current state of the Event Storming board.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "filter_by": {
+            "type": "string",
+            "enum": [
+              "all",
+              "domain_events",
+              "commands",
+              "aggregates",
+              "policies",
+              "hotspots",
+              "bounded_contexts"
+            ]
+          },
+          "bounded_context": {
+            "type": "string",
+            "description": "Optional filter by context name"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "advance_workshop_phase",
+      "description": "Move the workshop to the next phase after all acceptance criteria are met.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "current_phase": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "acceptance_criteria_confirmed": { "type": "boolean" },
+          "facilitator_notes": { "type": "string" }
+        },
+        "required": ["current_phase", "acceptance_criteria_confirmed"]
+      }
+    }
+  ]
+}
